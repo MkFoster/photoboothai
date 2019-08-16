@@ -1,0 +1,122 @@
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    box-sizing: border-box;
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    color: rgba(255, 255, 255, 0.65);
+    background: #111111;
+    font-size: 18px;
+    font-family: 'Eina01-Bold', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+h1 {
+    color: #ffffff;
+    font-size: 76px;
+    font-family: 'Eina01-Bold', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+h2 {
+    letter-spacing: -0.50px;
+    font-weight: 400;
+    font-size: 24px;
+    padding: .5vw 0;
+}
+
+h3 {
+    font-weight: 200;
+    letter-spacing: -0.50px;
+    padding: .3vw 0;
+}
+
+button {
+    border-radius: 4px;
+    padding-bottom: 10.5px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 13.5px;
+    font-weight: 600;
+    font-size: 16px;
+    margin: 10px;
+    background-color: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    position: relative;
+    float: right;
+}
+
+.button-primary {
+    background-color: purple;
+    border: 1px solid purple;
+    position: relative;
+    float: right;
+}
+
+.main {
+    background-image: url(assets/photos/cover-by-h-heyerlein.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    display: grid;
+    grid-template-columns: minmax(300px, 600px);
+    grid-template-rows: 100px 250px auto;
+    grid-gap: 5px;
+    padding: 100px;
+}
+
+.highlight {
+    color: purple;
+}
+
+.monitor {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    max-width: 30%;
+    max-height: 30%;
+    margin: 20px;
+    border: 10px solid rgba(255, 255, 255, 0.65);
+    display: none;
+    z-index: 2px;
+}
+
+.player {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    display: none;
+    z-index: 10;
+}
+
+.photo-credit {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+@media only screen and (max-width: 768px) {
+    h1 {
+        font-size: 28px;
+    }
+    h2 {
+        font-size: 24px;
+    }
+    .main {
+        grid-template-rows: 40px 300px 300px;
+        padding: 5px;
+    }
+}
