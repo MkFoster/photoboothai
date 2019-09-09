@@ -1,50 +1,41 @@
 const video = document.querySelector('.player');
 const canvas = document.querySelector('.monitor');
-const main = document.querySelector('.main');
+const landingScreen = document.querySelector('#landing-screen');
+const cameraScreen = document.querySelector('#camera-screen')
 const title = document.querySelector('.title');
 const overview = document.querySelector('.overview');
 const ctx = canvas.getContext('2d');
 const strip = document.querySelector('.strip');
-//const s3Url = `https://d183zisuhp1c4e.cloudfront.net/`;
-//const signedUrlEndpoint = `https://mgtoc5ns7i.execute-api.us-east-1.amazonaws.com/sign/aws-presigned-url`;
-//const expressionAiEndpoint = `https://l153r1gs0i.execute-api.us-east-1.amazonaws.com/prod/expression-ai`;
-//const s3Bucket = `markf-uploads`;
+const analyzeImageEndpoint = `https://photobooth-azure-func-app.azurewebsites.net/api/analyzeimage?code=VU/BNWwdqjIXVqiQlfiFP/pZKJeZsq9EHKhQvHL6XSpKYa6T1gUy7w==`;
 const okButton = document.querySelector('#ok');
 const noButton = document.querySelector('#no');
-let faceBoxOpacity = 1;
+const shutterButton = document.querySelector('#shutter-button');
+const status = document.querySelector('#status');
 let faceData;
 let currentEmotion;
 let faceOutlines;
 let vidInterval;
+let paintInterval;
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 let sound; //generated audio buffer
-//
-// AWS.config.region = 'us-east-1'; // Region
-// AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-//     IdentityPoolId: 'REPLACE_ME',
-// });
-/*AWS.config.region = 'us-east-1'; // Region
-AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: 'us-east-1:6df8fcad-40d3-41da-ba57-ca09df2c86be',
-});
-
-const polly = new AWS.Polly();*/
 
 video.addEventListener('canplay', paintToCanvas);
 
 video.addEventListener('play', () => {
-    vidInterval = setInterval(detectFaces, 4000);
+    //vidInterval = setInterval(detectFaces, 4000);
 });
 
 video.addEventListener('ended', () => {
-    clearInterval(vidInterval);
+    //clearInterval(vidInterval);
 });
 
 okButton.addEventListener('click', getVideo);
 noButton.addEventListener('click', () => window.location = 'https://www.unsplash.com');
+shutterButton.addEventListener('click', takePhoto);
 
+/*
 function detectFaces() {
     // use the face detection library to find the face
     faceOutlines = ccv.detect_objects({
@@ -56,26 +47,35 @@ function detectFaces() {
     if (faceOutlines.length > 0) {
         takePhoto();
     }
-}
+}*/
 
-function drawFaceData(faceDetail) {
-
-    if (faceBoxOpacity < 0) { return };
+function drawRectangle(rectangle, color, lineWidth) {
     let boundingPoints = {};
-    boundingPoints.topLeftX = Math.round(canvas.width * faceDetail.BoundingBox.Left);
-    boundingPoints.topLeftY = Math.round(canvas.height * faceDetail.BoundingBox.Top);
+    boundingPoints.topLeftX = rectangle.left;
+    boundingPoints.topLeftY = rectangle.top;
 
-    boundingPoints.topRightX = Math.round(boundingPoints.topLeftX + (canvas.width * faceDetail.BoundingBox.Width));
-    boundingPoints.topRightY = boundingPoints.topLeftY;
+    boundingPoints.topRightX = rectangle.left + rectangle.width;
+    boundingPoints.topRightY = rectangle.top;
 
-    boundingPoints.bottomLeftX = boundingPoints.topLeftX;
-    boundingPoints.bottomLeftY = Math.round(boundingPoints.topLeftY + (canvas.height * faceDetail.BoundingBox.Height));
+    boundingPoints.bottomLeftX = rectangle.left;
+    boundingPoints.bottomLeftY = rectangle.top + rectangle.height;
 
-    boundingPoints.bottomRightX = boundingPoints.topRightX;
-    boundingPoints.bottomRightY = boundingPoints.bottomLeftY;
+    boundingPoints.bottomRightX = rectangle.left + rectangle.width;
+    boundingPoints.bottomRightY = rectangle.top + rectangle.height;
 
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = `rgba(256,0,256,${faceBoxOpacity})`;
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
+
+    /*
+    console.log(boundingPoints.topLeftX, )
+    console.log(boundingPoints.topLeftX, boundingPoints.topLeftY);
+    console.log(boundingPoints.topRightX, boundingPoints.topRightY);
+    console.log(boundingPoints.bottomRightX, boundingPoints.bottomRightY);
+    console.log(boundingPoints.bottomLeftX, boundingPoints.bottomRightY);
+    console.log(boundingPoints.topLeftX, boundingPoints.topRightY);*/
+
+    // !Important Note: If you don't use ctx.beginPath() and ctx.closePath() stroke color and width on 
+    // previously drawn lines will be changed to the last new line style
     ctx.beginPath();
     ctx.moveTo(boundingPoints.topLeftX, boundingPoints.topLeftY);
     ctx.lineTo(boundingPoints.topRightX, boundingPoints.topRightY);
@@ -83,17 +83,17 @@ function drawFaceData(faceDetail) {
     ctx.lineTo(boundingPoints.bottomLeftX, boundingPoints.bottomRightY);
     ctx.lineTo(boundingPoints.topLeftX, boundingPoints.topRightY);
     ctx.stroke();
+    ctx.closePath();
 }
 
 function getVideo() {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    navigator.mediaDevices.getUserMedia({ video: { width: 800, height: 600 }, audio: false })
         .then(localMediaStream => {
             //canvas(localMediaStream);
             video.srcObject = localMediaStream;
             video.play();
-            canvas.style.display = 'block';
-            title.style.display = 'none';
-            overview.style.display = 'none';
+            landingScreen.style.display = 'none';
+            cameraScreen.style.display = 'grid';
         })
         .catch(err => console.error(`OH NO!!`, err));
 }
@@ -104,31 +104,56 @@ function paintToCanvas() {
     canvas.width = width;
     canvas.height = height;
 
-    setInterval(() => {
+    paintInterval = setInterval(() => {
         ctx.drawImage(video, 0, 0, width, height);
-        let pixels = ctx.getImageData(0, 0, width, height);
+        const pixels = ctx.getImageData(0, 0, width, height);
         ctx.putImageData(pixels, 0, 0);
-        if ((typeof faceData != 'undefined') &&
-            (typeof faceData.FaceDetails != 'undefined') &&
-            Array.isArray(faceData.FaceDetails) &&
-            (faceData.FaceDetails.length > 0)) {
-            faceBoxOpacity = faceBoxOpacity - .05;
-            for (var i = 0; i < faceData.FaceDetails.length; i++) {
-                //console.log('face found');
-                //console.log(faceOutlines[i]);
-                drawFaceData(faceData.FaceDetails[i]);
-            }
-        }
     }, 100);
 }
 
-function takePhoto() {
+async function takePhoto() {
+    clearInterval(paintInterval);
+    console.log('shutter clicked');
     const data = canvas.toDataURL('image/jpeg');
+    let uuid = uuidv4();
+    let blobName = `${uuid}.jpg`;
+    const uploadResponse = await upload(dataURLToBlob(data), blobName);
+    console.log(`uuid: ${uuid}`);
+    const photoMetadata = await analyzeImage(uuid);
+    console.log(photoMetadata);
+    let smileScore = 0;
+    photoMetadata.FaceData.map(face => {
+        //If we see a smile on that face increment the smile score!
+        if (face.faceAttributes.smile > 0.4) {
+            drawRectangle(face.faceRectangle, `rgba(255,0,255,0.8)`, 4);
+            smileScore++;
+        }
+    });
+    let logoScore = 0;
+    photoMetadata.LogoData.predictions.map(prediction => {
+        if (prediction.probability > .80) {
+            const translatedRectangle = {
+                left: Math.round(canvas.width * prediction.boundingBox.left),
+                top: Math.round(canvas.height * prediction.boundingBox.top),
+                width: Math.round(canvas.width * prediction.boundingBox.width),
+                height: Math.round(canvas.height * prediction.boundingBox.height),
+            }
+            drawRectangle(translatedRectangle, `rgba(255,255,0,0.8)`, 4);
+            logoScore++;
+        }
+    });
+    const smileDisplayScore = smileScore * 1000; // 'cause video games have to have scores in the thousands ;)
+    const logoDisplayScore = logoScore * 1000;
+    const totalScore = smileDisplayScore + logoDisplayScore;
+    status.innerHTML = `Total Score: ${totalScore}`;
+    const annotatedPhoto = canvas.toDataURL('image/jpeg');
     const link = document.createElement('a');
-    link.href = data;
-    link.setAttribute('download', 'handsome');
-    link.innerHTML = `<img src="${data}" alt="Portrait" />`;
-    upload(dataURLToBlob(data));
+    link.href = annotatedPhoto;
+    link.setAttribute('download', 'portrait.jpg');
+    link.innerHTML = `<div class="snap"><img src="${annotatedPhoto}" alt="Portrait" /><div class="snap-caption">Score: ${totalScore}</div></div>`;
+    strip.insertBefore(link, strip.firstChild);
+    setTimeout(paintToCanvas, 2000);
+    //canvas.style.display = 'none';
 }
 
 function uuidv4() {
@@ -171,81 +196,50 @@ function blobToFile(theBlob, fileName) {
     return theBlob;
 }
 
-/*function getSignedUrlPromise(fileName, fileType) {
-    let url = `${signedUrlEndpoint}?name=${fileName}&type=${fileType}`;
-    return fetch(url)
+async function getSasUrlPromise(blobName, contentType) {
+    let url = `https://mk-azure-upload.azurewebsites.net/api/azure-sas?code=5YOXZjWIeb5LC65c9WICbE3DNj6NfdhyfUABN0UXEAk9o/xAyYGJYg==`;
+    return await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({
+                container: 'photoboothai',
+                blobName: blobName
+            }),
+            headers: {
+                "Content-Type": contentType
+            }
+        })
         .then(
             response => response.json() // if the response is a JSON object
         ).catch(
             error => console.log(error) // Handle the error response object
         );
-}*/
+}
 
 // This will upload the file after having read it
-async function upload(imageBlob) {
+async function upload(imageBlob, blobName) {
     //Upload the image
     //showModal('Uploading and analyzing image...');
-    let file = blobToFile(imageBlob, 'inputimage.jpg');
-    let fileType = 'image/jpeg';
-    let uuid = uuidv4();
-    /*let s3ImagePath = `expression-ai/${uuid}.jpg`;
-    const presignedUrlObj = await getSignedUrlPromise(s3ImagePath, fileType);
-    const s3ImageUrl = s3Url + s3ImagePath;
-    const s3Upload = await fetch(presignedUrlObj.url, {
+    const file = blobToFile(imageBlob, 'inputimage.jpg');
+    const sasUriObj = await getSasUrlPromise(blobName);
+    const sasUri = sasUriObj.uri;
+    const mkAzureUpload = await fetch(sasUri, {
             method: 'PUT',
             body: file,
             headers: {
-                "Content-Type": fileType
+                "Content-Type": "image/jpeg",
+                "x-ms-blob-type": "BlockBlob"
             }
         })
-        .then((response) => {
-            analyzeImage(uuid);
-        })
-        .catch(error => console.log(error));*/
+        .then(() => true)
+        .catch(error => console.log(error));
 };
 
-//Calls detectFacesAws API and shows estimated ages of detected faces
-function analyzeImage(uuid) {
-    /*const url = `${expressionAiEndpoint}?action=analyzeImage&uuid=${uuid}`;
-    fetch(url)
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(data) {
-            console.log(data);
-            if (data.dominantEmotion && (data.imageList.length > 0)) {
-                const image = data.imageList[Math.floor(Math.random() * data.imageList.length)];
-                main.style.backgroundImage = `url(assets/photos/${data.dominantEmotion.type}/${image.filename})`;
-                setPhotoCreditHtml(image.photographer_id, image.photographer_name);
-                if (data.dominantEmotion.type != currentEmotion) {
-                    textToSpeech(data.dominantEmotion.type);
-                    currentEmotion = data.dominantEmotion.type;
-                }
-                faceData = data;
-                faceBoxOpacity = 1.0;
-            }
-        })
-        .catch(error => console.log(error)); // an error occurred*/
-}
-
-function setPhotoCreditHtml(photographerId, photographerName) {
-    /*const photoCredit = `<a style="background-color:black;color:white;text-decoration:none;padding:4px 6px;font-family:-apple-system, BlinkMacSystemFont, &quot;San Francisco&quot;, &quot;Helvetica Neue&quot;, Helvetica, Ubuntu, Roboto, Noto, &quot;Segoe UI&quot;, Arial, sans-serif;font-size:12px;font-weight:bold;line-height:1.2;display:inline-block;border-radius:3px" 
-        href="https://unsplash.com/@${photographerId}?utm_medium=referral&amp;utm_campaign=photographer-credit&amp;utm_content=creditBadge" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        title="Download free do whatever you want high-resolution photos from ${photographerName}">
-        <span style="display:inline-block;padding:2px 3px">
-            <svg xmlns="http://www.w3.org/2000/svg" style="height:12px;width:auto;position:relative;vertical-align:middle;top:-1px;fill:white" viewBox="0 0 32 32">
-                <title>unsplash-logo</title>
-                <path d="M20.8 18.1c0 2.7-2.2 4.8-4.8 4.8s-4.8-2.1-4.8-4.8c0-2.7 2.2-4.8 4.8-4.8 2.7.1 4.8 2.2 4.8 4.8zm11.2-7.4v14.9c0 2.3-1.9 4.3-4.3 4.3h-23.4c-2.4 0-4.3-1.9-4.3-4.3v-15c0-2.3 1.9-4.3 4.3-4.3h3.7l.8-2.3c.4-1.1 1.7-2 2.9-2h8.6c1.2 0 2.5.9 2.9 2l.8 2.4h3.7c2.4 0 4.3 1.9 4.3 4.3zm-8.6 7.5c0-4.1-3.3-7.5-7.5-7.5-4.1 0-7.5 3.4-7.5 7.5s3.3 7.5 7.5 7.5c4.2-.1 7.5-3.4 7.5-7.5z">
-                </path>
-            </svg>
-        </span>
-        <span style="display:inline-block;padding:2px 3px">
-            ${photographerName}
-        </span>
-    </a>`;
-    document.querySelector('.photo-credit').innerHTML = photoCredit;*/
+//Calls Microsoft Face API and shows estimated ages of detected faces
+async function analyzeImage(uuid) {
+    const analyzeImageUrl = `${analyzeImageEndpoint}&uuid=${uuid}`;
+    const response = await fetch(analyzeImageUrl);
+    const data = await response.json();
+    return data;
 }
 
 function textToSpeech(text) {
