@@ -18,13 +18,12 @@
             <p>Microsoft Azure AI Hackathon July 10 - September 10, 2019</p>
             <br/>
             <p id="description"><span class="highlight">Note:</span> This site uses your webcam to take pictures of you and upload them for analysis by AI services. Please click allow when prompted by your browser to use the webcam. Do you want to continue?</p>
-            <p>If you are having issues getting the camera view up on Windows, make sure that your browser has permission to use your webcam in &quot;Camera Privacy Settings&quot;.</p>
+            <!--p>If you are having issues getting the camera view up on Windows, make sure that your browser has permission to use your webcam in &quot;Camera Privacy Settings&quot;.</p-->
             <button type="button" id="ok" class="button-primary">Let's Go!</button>
             <button type="button" id="no">Nope</button>
         </div>
 
     </div>
-
 
     <div id="camera-screen" style="display: none">
         <div>
@@ -35,8 +34,9 @@
         <div>
             <div id="status">Status: Waiting for your first photo!</div>
             <button type="button" id="shutter-button" class="button-primary">Take photo</button>
+            <button type="button" id="add-logo-sticker">Add logo sticker</button>
             <div id="instructions">
-                <p>Instructions: To test this out, download and printout the demo logo from here... </p>
+                <p>To test this out, download and printout the demo logo from below or click &quot;Add logo sticker&quot; </p>
                 <a href="assets/placeholder.com-logo3.jpg"><img class="placeholder" src="assets/placeholder.com-logo3.jpg" width="173" height="37" alt="Placeholder.com test image"></a>
                 <p>For this demo, we are going to pretend this is the logo for our favorite charity (since I don't have permission to use a real one). Hold the printed logo in view of the camera, smile big, and click &quot;Take photo&quot;. Big smiles and
                     logos earn big points and you will see a rectangle around your smiling face and the logo.
@@ -45,6 +45,7 @@
                         them.
                     </p>
                     <p>Thank you to the folks at <a href="https://placeholder.com">https://placeholder.com</a> for making these logos available for testing.</p>
+                    <img src="assets/placeholder-sticker.png" id="placeholder-sticker">
             </div>
         </div>
         <!--video class="player"></video-->

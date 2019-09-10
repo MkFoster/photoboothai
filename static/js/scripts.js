@@ -10,17 +10,21 @@ const analyzeImageEndpoint = `https://photobooth-azure-func-app.azurewebsites.ne
 const okButton = document.querySelector('#ok');
 const noButton = document.querySelector('#no');
 const shutterButton = document.querySelector('#shutter-button');
+const addLogoStickerButton = document.querySelector('#add-logo-sticker');
 const status = document.querySelector('#status');
+const placeholderSticker = document.querySelector('#placeholder-sticker');
 let faceData;
 let currentEmotion;
 let faceOutlines;
 let vidInterval;
 let paintInterval;
+let addLogoSticker = false;
 
 video.addEventListener('canplay', paintToCanvas);
 okButton.addEventListener('click', getVideo);
 noButton.addEventListener('click', () => window.location = 'https://www.unsplash.com');
 shutterButton.addEventListener('click', takePhoto);
+addLogoStickerButton.addEventListener('click', () => (addLogoSticker = true));
 
 function drawRectangle(rectangle, color, lineWidth) {
     let boundingPoints = {};
@@ -72,6 +76,9 @@ function paintToCanvas() {
         ctx.drawImage(video, 0, 0, width, height);
         const pixels = ctx.getImageData(0, 0, width, height);
         ctx.putImageData(pixels, 0, 0);
+        if (addLogoSticker) {
+            ctx.drawImage(placeholderSticker, 10, 10);
+        }
     }, 100);
 }
 
