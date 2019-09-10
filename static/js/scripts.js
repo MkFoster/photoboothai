@@ -63,7 +63,12 @@ function getVideo() {
             landingScreen.style.display = 'none';
             cameraScreen.style.display = 'grid';
         })
-        .catch(err => console.error(`OH NO!!`, err));
+        .catch(err => {
+            console.error(`OH NO!!`, err);
+            alert(`Sorry. PhotoBoothAI is having a bit of trouble getting your webcam up.  If you are on Windows make sure that your browser has 
+ permission to use your webcam in "Camera Privacy Settings". Make sure your webcam isn't already in use and when your
+ browser prompts you, click "Allow" to allow the browser to use your webcam for this site.`);
+        });
 }
 
 function paintToCanvas() {
