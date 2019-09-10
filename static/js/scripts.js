@@ -17,37 +17,10 @@ let faceOutlines;
 let vidInterval;
 let paintInterval;
 
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-let sound; //generated audio buffer
-
 video.addEventListener('canplay', paintToCanvas);
-
-video.addEventListener('play', () => {
-    //vidInterval = setInterval(detectFaces, 4000);
-});
-
-video.addEventListener('ended', () => {
-    //clearInterval(vidInterval);
-});
-
 okButton.addEventListener('click', getVideo);
 noButton.addEventListener('click', () => window.location = 'https://www.unsplash.com');
 shutterButton.addEventListener('click', takePhoto);
-
-/*
-function detectFaces() {
-    // use the face detection library to find the face
-    faceOutlines = ccv.detect_objects({
-        "canvas": (ccv.pre(canvas)),
-        "cascade": cascade,
-        "interval": 5,
-        "min_neighbors": 1
-    });
-    if (faceOutlines.length > 0) {
-        takePhoto();
-    }
-}*/
 
 function drawRectangle(rectangle, color, lineWidth) {
     let boundingPoints = {};
@@ -66,14 +39,6 @@ function drawRectangle(rectangle, color, lineWidth) {
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = color;
 
-    /*
-    console.log(boundingPoints.topLeftX, )
-    console.log(boundingPoints.topLeftX, boundingPoints.topLeftY);
-    console.log(boundingPoints.topRightX, boundingPoints.topRightY);
-    console.log(boundingPoints.bottomRightX, boundingPoints.bottomRightY);
-    console.log(boundingPoints.bottomLeftX, boundingPoints.bottomRightY);
-    console.log(boundingPoints.topLeftX, boundingPoints.topRightY);*/
-
     // !Important Note: If you don't use ctx.beginPath() and ctx.closePath() stroke color and width on 
     // previously drawn lines will be changed to the last new line style
     ctx.beginPath();
@@ -89,7 +54,6 @@ function drawRectangle(rectangle, color, lineWidth) {
 function getVideo() {
     navigator.mediaDevices.getUserMedia({ video: { width: 800, height: 600 }, audio: false })
         .then(localMediaStream => {
-            //canvas(localMediaStream);
             video.srcObject = localMediaStream;
             video.play();
             landingScreen.style.display = 'none';
@@ -113,17 +77,14 @@ function paintToCanvas() {
 
 async function takePhoto() {
     clearInterval(paintInterval);
-    console.log('shutter clicked');
     var audio = new Audio('assets/shutter.mp3');
     audio.play();
     const data = canvas.toDataURL('image/jpeg');
     let uuid = uuidv4();
     let blobName = `${uuid}.jpg`;
     const uploadResponse = await upload(dataURLToBlob(data), blobName);
-    console.log(`uuid: ${uuid}`);
     status.innerHTML = `Calling Azure function that calls Azure Face and Custom Vision APIs...`;
     const photoMetadata = await analyzeImage(uuid);
-    console.log(photoMetadata);
     let smileScore = 0;
     photoMetadata.FaceData.map(face => {
         //If we see a smile on that face increment the smile score!
@@ -171,7 +132,6 @@ async function takePhoto() {
     link.innerHTML = `<div class="snap"><img src="${annotatedPhoto}" alt="Portrait" /><div class="snap-caption">Score: ${totalScore}</div></div>`;
     strip.insertBefore(link, strip.firstChild);
     setTimeout(paintToCanvas, 2000);
-    //canvas.style.display = 'none';
 }
 
 function uuidv4() {
@@ -236,7 +196,6 @@ async function getSasUrlPromise(blobName, contentType) {
 // This will upload the file after having read it
 async function upload(imageBlob, blobName) {
     //Upload the image
-    //showModal('Uploading and analyzing image...');
     const file = blobToFile(imageBlob, 'inputimage.jpg');
     status.innerHTML = `Getting an shared access signature URL for upload from Azure function...`;
     const sasUriObj = await getSasUrlPromise(blobName);
@@ -261,38 +220,3 @@ async function analyzeImage(uuid) {
     const data = await response.json();
     return data;
 }
-
-function textToSpeech(text) {
-    /*var params = {
-        OutputFormat: "mp3",
-        SampleRate: "16000",
-        Text: text,
-        TextType: "text",
-        VoiceId: "Nicole"
-    };
-
-    polly.synthesizeSpeech(params, function(err, data) {
-        if (err) console.log(err, err.stack); // an error occurred
-        else {
-            console.log(data); // successful response
-            audioCtx.decodeAudioData(data.AudioStream.buffer, function(buffer) {
-                sound = buffer;
-
-                if (navigator.userAgent.match(/(iPod|iPhone|iPad)/i)) {
-                    $("#speakbutton").show();
-                }
-
-                speak();
-            });
-        }
-    });*/
-}
-
-function speak() {
-    /*var source = audioCtx.createBufferSource();
-    source.buffer = sound;
-    source.connect(audioCtx.destination);
-    source.start(0);*/
-}
-
-//textToSpeech('Welcome to Expression A I');
