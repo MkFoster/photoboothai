@@ -17,7 +17,7 @@
             <h2>A web photo booth that awards points for promoting charities on social media</h2>
             <p>Microsoft Azure AI Hackathon July 10 - September 10, 2019</p>
             <br/>
-            <p class="instructions"><span class="highlight">Note:</span> This site uses your webcam to take pictures of you and upload them for analysis by AI services. Please click allow when prompted by your browser to use the webcam. Do you want to continue?</p>
+            <p id="description"><span class="highlight">Note:</span> This site uses your webcam to take pictures of you and upload them for analysis by AI services. Please click allow when prompted by your browser to use the webcam. Do you want to continue?</p>
             <button type="button" id="ok" class="button-primary">Let's Go!</button>
             <button type="button" id="no">Nope</button>
         </div>
@@ -25,18 +25,34 @@
     </div>
 
 
-    <div id="camera-screen">
+    <div id="camera-screen" style="display: none">
         <div>
             <canvas class="monitor"></canvas>
             <video class="player"></video>
         </div>
         <div class="strip"></div>
         <div>
-            <span id="status"></span>
+            <div id="status">Status: Waiting for your first photo!</div>
             <button type="button" id="shutter-button" class="button-primary">Take photo</button>
+            <div id="instructions">
+                <p>Instructions: To test this out, download and printout the demo logo from here... </p>
+                <a href="assets/placeholder.com-logo3.jpg"><img class="placeholder" src="assets/placeholder.com-logo3.jpg" width="173" height="37" alt="Placeholder.com test image"></a>
+                <p>For this demo, we are going to pretend this is the logo for our favorite charity (since I don't have permission to use a real one). Hold the printed logo in view of the camera, smile big, and click &quot;Take photo&quot;. Big smiles and
+                    logos earn big points and you will see a rectangle around your smiling face and the logo.
+
+                    <p>Want to challenge the logo recognition model? Printout some similar logos from <a href="https://placeholder.com/logos/">https://placeholder.com/logos/</a> and see if PhotoboothAI boxes them and gives you credit or properly ignores
+                        them.
+                    </p>
+                    <p>Thank you to the folks at <a href="https://placeholder.com">https://placeholder.com</a> for making these logos available for testing.</p>
+            </div>
         </div>
         <!--video class="player"></video-->
     </div>
+
+    <a class="photo-credit" style="background-color:black;color:white;text-decoration:none;padding:4px 6px;font-family:-apple-system, BlinkMacSystemFont, Helvetica, Ubuntu, Roboto, Noto, Arial, sans-serif;font-size:12px;font-weight:bold;line-height:1.2;display:inline-block;border-radius:3px"
+        href="https://unsplash.com/@dollargill?utm_medium=referral&amp;utm_campaign=photographer-credit&amp;utm_content=creditBadge" target="_blank" rel="noopener noreferrer" title="Download free do whatever you want high-resolution photos from Dollar Gill"><span style="display:inline-block;padding:2px 3px"><svg xmlns="http://www.w3.org/2000/svg" style="height:12px;width:auto;position:relative;vertical-align:middle;top:-2px;fill:white" viewBox="0 0 32 32"><title>unsplash-logo</title><path d="M10 9V0h12v9H10zm12 5h10v18H0V14h10v9h12v-9z"></path></svg></span>
+        <span style="display:inline-block;padding:2px 3px">Dollar Gill</span>
+    </a>
 
     <script src="js/scripts.js"></script>
 </body>

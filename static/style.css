@@ -7,21 +7,33 @@
     margin: 0;
 }
 
+:root {
+    --main-highlight-color: #03ACCD;
+}
+
 html {
     box-sizing: border-box;
     height: 100%;
 }
 
 body {
+    background-image: url(assets/dollar-gill-yqNRxWNrC04-unsplash-compressed.jpg);
+    background-repeat: repeat-y;
+    background-position: center;
+    background-size: cover;
     height: 100%;
-    color: #111;
-    background: #eeeeee;
+    color: #eee;
     font-size: 18px;
     font-family: 'Eina01-Bold', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+p {
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
 h1 {
-    color: #111;
+    color: #eee;
     font-size: 76px;
     font-family: 'Eina01-Bold', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -37,6 +49,11 @@ h3 {
     font-weight: 200;
     letter-spacing: -0.50px;
     padding: .3vw 0;
+}
+
+a {
+    color: #eee;
+    text-decoration: none;
 }
 
 button {
@@ -57,14 +74,15 @@ button {
 }
 
 .button-primary {
-    background-color: purple;
-    border: 1px solid purple;
+    background-color: var(--main-highlight-color);
+    border: 1px solid var(--main-highlight-color);
     position: relative;
     float: right;
+    outline: none;
 }
 
 #landing-screen {
-    /*background-image: url(assets/photos/cover-by-h-heyerlein.jpg);
+    /*background-image: url(assets/dollar-gill-yqNRxWNrC04-unsplash-compressed.jpg);
     background-repeat: no-repeat;
     background-position: center;*/
     width: 100%;
@@ -72,19 +90,43 @@ button {
     /*background-size: cover;*/
     display: grid;
     grid-template-columns: minmax(300px, 600px);
-    grid-template-rows: 100px 250px auto;
+    grid-template-rows: 100px auto 100%;
     grid-gap: 5px;
     padding: 100px;
 }
 
 #camera-screen {
+    /*background-image: url(assets/dollar-gill-yqNRxWNrC04-unsplash-compressed.jpg);
+    background-repeat: repeat;
+    background-position: center;*/
     width: 100%;
     height: 100%;
     /*background-size: cover;*/
-    display: grid;
     grid-template-columns: 820px auto;
     grid-template-rows: 620px auto;
     grid-gap: 5px;
+    padding: 60px;
+}
+
+.overview {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.title h1 {
+    margin-left: 15px;
+}
+
+#instructions {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 20px;
+    margin-top: 70px;
+}
+
+.placeholder {
+    margin-bottom: 20px;
 }
 
 .strip {
@@ -96,11 +138,11 @@ button {
     overflow-x: scroll;
     padding: 0.8rem 0.8rem 2.5rem 0.8rem;
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-    background: white;
+    background: #eee;
 }
 
 .strip a:nth-child(5n+1) .snap {
-    transform: rotate(0deg);
+    transform: rotate(3deg);
 }
 
 .strip a:nth-child(5n+2) .snap {
@@ -128,13 +170,13 @@ button {
 }
 
 .highlight {
-    color: purple;
+    color: var(--main-highlight-color);
 }
 
 .monitor {
     max-width: 100%;
     max-height: 100%;
-    border: 10px solid rgba(255, 255, 255, 0.65);
+    border: 10px solid #eee;
     z-index: 2px;
 }
 

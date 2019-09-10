@@ -114,11 +114,14 @@ function paintToCanvas() {
 async function takePhoto() {
     clearInterval(paintInterval);
     console.log('shutter clicked');
+    var audio = new Audio('assets/shutter.mp3');
+    audio.play();
     const data = canvas.toDataURL('image/jpeg');
     let uuid = uuidv4();
     let blobName = `${uuid}.jpg`;
     const uploadResponse = await upload(dataURLToBlob(data), blobName);
     console.log(`uuid: ${uuid}`);
+    status.innerHTML = `Calling Azure function that calls Azure Face and Custom Vision APIs...`;
     const photoMetadata = await analyzeImage(uuid);
     console.log(photoMetadata);
     let smileScore = 0;
@@ -145,7 +148,22 @@ async function takePhoto() {
     const smileDisplayScore = smileScore * 1000; // 'cause video games have to have scores in the thousands ;)
     const logoDisplayScore = logoScore * 1000;
     const totalScore = smileDisplayScore + logoDisplayScore;
-    status.innerHTML = `Total Score: ${totalScore}`;
+    let scoreAudio;
+    if (totalScore > 0) {
+        scoreAudio = new Audio('assets/score.mp3');
+    } else {
+        scoreAudio = new Audio('assets/noscore.mp3');
+    }
+    scoreAudio.play();
+    let emoji;
+    if (totalScore < 1) {
+        emoji = '&#128577';
+    } else if ((totalScore > 1) && (totalScore < 2000)) {
+        emoji = '&#128578';
+    } else if (totalScore >= 2000) {
+        emoji = '&#128515';
+    }
+    status.innerHTML = `Done! Your Score: ${totalScore} ${emoji}`;
     const annotatedPhoto = canvas.toDataURL('image/jpeg');
     const link = document.createElement('a');
     link.href = annotatedPhoto;
@@ -220,8 +238,10 @@ async function upload(imageBlob, blobName) {
     //Upload the image
     //showModal('Uploading and analyzing image...');
     const file = blobToFile(imageBlob, 'inputimage.jpg');
+    status.innerHTML = `Getting an shared access signature URL for upload from Azure function...`;
     const sasUriObj = await getSasUrlPromise(blobName);
     const sasUri = sasUriObj.uri;
+    status.innerHTML = `Uploading your image to Azure Storage for processsing...`;
     const mkAzureUpload = await fetch(sasUri, {
             method: 'PUT',
             body: file,
